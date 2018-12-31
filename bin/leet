@@ -1,0 +1,68 @@
+#!/usr/bin/env ruby
+
+def usage
+  usage =
+"Usage:
+  leet <command> <filename>
+Commands:
+  C, Create \t Create solution file and test file
+  D, Delete \t Remove solution file and test file
+  T, Test   \t Run Rspec test for specified file"
+  puts usage
+end
+
+def create_file(file_type, name)
+  case file_type
+  when 'solution'
+    filename = "problem/#{name}.rb"
+    file = File.open(filename, 'w')
+  when 'test'
+    filename = "spec/#{name}_spec.rb"
+    File.open(filename, 'w') do |f|
+      f.write default_spec_content(name)
+    end
+  else
+    raise ArgumentError
+  end
+end
+
+def default_spec_content(name)
+  <<~EOF
+    require_relative "../problem/#{name}"
+
+    describe "Problem #{name}" do
+      it { expect(solution()).to eq() }
+    end
+  EOF
+end
+
+if ARGV.empty?
+  usage
+  exit 1
+end
+
+solution = "problem/#{ARGV[1]}.rb"
+test = "spec/#{ARGV[1]}_spec.rb"
+
+case ARGV[0].downcase
+when 'create', 'c'
+  %w{solution test}.each do |file|
+    puts "create new file #{eval(file)}"
+    if File.exist?(eval(file))
+      puts "#{eval(file)} already exist, override? ('Y' to confirm or any other key to cancel)"
+
+      create_file(file, ARGV[1]) if STDIN.gets == 'Y'
+    else
+      create_file(file, ARGV[1])
+    end
+  end
+when 'delete', 'd'
+  %w{solution test}.each do |file|
+    puts "file #{eval(file)} removed"
+    File.delete(eval(file))
+  end
+when 'test', 't'
+  exec("rspec #{test}")
+else
+  usage
+end
