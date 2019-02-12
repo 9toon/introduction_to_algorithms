@@ -27,3 +27,23 @@ def partition(arr, p, r)
 
   return i + 1
 end
+
+def randomized_quick_sort(arr, p, r)
+  if p < r
+    q = randomized_partition(arr, p, r)
+    randomized_quick_sort(arr, p, q - 1)
+    randomized_quick_sort(arr, q + 1, r)
+  end
+
+  arr
+end
+
+def randomized_partition(arr, p, r)
+  i = (p..r).to_a.sample
+
+  tmp = arr[i - 1]
+  arr[i - 1] = arr[r - 1]
+  arr[r - 1] = tmp
+
+  partition(arr, p, r)
+end
